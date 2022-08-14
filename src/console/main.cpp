@@ -13,6 +13,7 @@
 #include <vector>
 #include <ncurses.h>
 
+// Data structures
 typedef struct{
   int rows;             // total rows
   int cols;             // total columns
@@ -25,36 +26,114 @@ typedef struct{
   int msg_rows;         // msg window rows
   int msg_cols;         // msg window columns
 
-  WINDOW *msg_win;
-  WINDOW *console_win;
+  WINDOW *msg_win;      // message window (captured from SST output)
+  WINDOW *console_win;  // user console window
 }DBGCFG;
 
+typedef struct{
+  std::string cmd;        // command string
+  bool (*func)(DBGCFG *); // function callback
+  bool end;               // end of the command list
+}CMDHANDLER;
+
+// Prototypes for commands
+bool CmdExit(DBGCFG* Conf);
+bool CmdRun(DBGCFG* Conf);
+bool CmdDump(DBGCFG* Conf);
+bool CmdKill(DBGCFG* Conf);
+bool CmdPause(DBGCFG* Conf);
+bool CmdHelp(DBGCFG* Conf);
+bool CmdClear(DBGCFG* Conf);
+
+// Command list
+CMDHANDLER Cmds[] = {
+  {"run",   CmdRun,   false},
+  {"dump",  CmdDump,  false},
+  {"kill",  CmdKill,  false},
+  {"pause", CmdPause, false},
+  {"exit",  CmdExit,  false},
+  {"clear", CmdClear, false},
+  {"help",  CmdHelp,  false},
+  {"null",  nullptr,  true}
+};
+
 #define CONSOLE_WIN_YDIM  5
+#define MAX_STR           1024
+
+bool CmdHelp(DBGCFG* Conf){
+  mvwprintw(Conf->console_win, 2,3,
+            "Commands: run dump kill pause clear exit help");
+  wrefresh(Conf->console_win);
+  return false;
+}
+
+bool CmdExit(DBGCFG* Conf){
+  return true;
+}
+
+bool CmdClear(DBGCFG* Conf){
+  return false;
+}
+
+bool CmdPause(DBGCFG* Conf){
+  return false;
+}
+
+bool CmdKill(DBGCFG* Conf){
+  return false;
+}
+
+bool CmdRun(DBGCFG* Conf){
+  return false;
+}
+
+bool CmdDump(DBGCFG* Conf){
+  return false;
+}
+
+bool ProcessCommand(DBGCFG &Conf, char *str){
+  std::string TmpCmd(str);
+  unsigned i = 0;
+  bool (*func)(DBGCFG *);
+
+  do{
+    if( TmpCmd == Cmds[i].cmd ){
+      // execute it
+      func = Cmds[i].func;
+      return (*func)(&Conf);
+    }
+    i++;
+  }while( !Cmds[i].end );
+  mvwprintw(Conf.console_win, 2,1, "ERROR: UNKNOWN COMMAND:");
+  mvwprintw(Conf.console_win, 3,1, str);
+  wrefresh(Conf.console_win);
+
+  return false;
+}
 
 void Console(DBGCFG &Conf){
 
   int ch;
   bool done = false;
+  char str[MAX_STR];
 
   mvwprintw(Conf.console_win, 0,1, "COMMAND CONSOLE");
   mvwprintw(Conf.console_win, 1,1, "$> ");
   mvwprintw(Conf.msg_win, 0,1, "SST-DBG");
-  mvwprintw(Conf.msg_win, 1,1, "SST_MSG");
   wrefresh(Conf.console_win);
   wrefresh(Conf.msg_win);
 
   // main console loop
-  while( (ch = getch()) && !done ){
-    switch( ch ){
-      case 10:
-        done = true;
-        break;
-      default:
-        move(LINES-(CONSOLE_WIN_YDIM-1), 4);
-        wrefresh(Conf.console_win);
-        refresh();
-        break;
-    }
+  while(!done){
+    getstr(str);
+    move(LINES-(CONSOLE_WIN_YDIM-1), 4);
+    wrefresh(Conf.console_win);
+    wclear(Conf.console_win);
+    box(Conf.console_win, 0, 0);
+    mvwprintw(Conf.console_win, 0,1, "COMMAND CONSOLE");
+    mvwprintw(Conf.console_win, 1,1, "$> ");
+    wrefresh(Conf.console_win);
+    done = ProcessCommand(Conf, str);
   }
 
   delwin(Conf.msg_win);
