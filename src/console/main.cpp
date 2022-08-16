@@ -9,12 +9,26 @@
 //
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <ncurses.h>
 
 // Data structures
 typedef struct{
+
+  // -- basic configuration
+  std::string sst;      // SST command to execute
+  bool isHelp;          // Is the help menu selected?
+
+  // -- window configuration
   int rows;             // total rows
   int cols;             // total columns
   int console_startx;   // console window start-x
@@ -25,9 +39,13 @@ typedef struct{
   int msg_starty;       // msg window start-y
   int msg_rows;         // msg window rows
   int msg_cols;         // msg window columns
-
   WINDOW *msg_win;      // message window (captured from SST output)
   WINDOW *console_win;  // user console window
+
+  // -- process configuration
+  pid_t pid;            // child pid
+  int filedes[2];       // child file descriptors
+
 }DBGCFG;
 
 typedef struct{
@@ -37,13 +55,13 @@ typedef struct{
 }CMDHANDLER;
 
 // Prototypes for commands
-bool CmdExit(DBGCFG* Conf);
-bool CmdRun(DBGCFG* Conf);
-bool CmdDump(DBGCFG* Conf);
-bool CmdKill(DBGCFG* Conf);
-bool CmdPause(DBGCFG* Conf);
-bool CmdHelp(DBGCFG* Conf);
-bool CmdClear(DBGCFG* Conf);
+bool CmdExit(DBGCFG* Conf);     // Exit the application
+bool CmdRun(DBGCFG* Conf);      // Run the SST sim
+bool CmdDump(DBGCFG* Conf);     // Dump the SST data
+bool CmdKill(DBGCFG* Conf);     // Kill the running SST sim
+bool CmdPause(DBGCFG* Conf);    // Pause the SST sim
+bool CmdHelp(DBGCFG* Conf);     // Print the help menu
+bool CmdClear(DBGCFG* Conf);    // Clear the message screen
 
 // Command list
 CMDHANDLER Cmds[] = {
@@ -68,6 +86,9 @@ bool CmdHelp(DBGCFG* Conf){
 }
 
 bool CmdExit(DBGCFG* Conf){
+  if( Conf->pid > 0 ){
+    // kill the child process
+  }
   return true;
 }
 
@@ -84,6 +105,42 @@ bool CmdKill(DBGCFG* Conf){
 }
 
 bool CmdRun(DBGCFG* Conf){
+  if( Conf->pid > 0 ){
+    mvwprintw(Conf->console_win, 2,1, "ERROR: SST is already running");
+    wrefresh(Conf->console_win);
+    return false;
+  }
+
+  // create the named pipe
+  if( pipe(Conf->filedes) == -1 ){
+    mvwprintw(Conf->console_win, 2,1, "ERROR: Cannot create pipe for SST child process");
+    wrefresh(Conf->console_win);
+    return false;
+  }
+
+  // fork the child process
+  Conf->pid = fork();
+  if( Conf->pid == -1 ){
+    // error occurred
+    mvwprintw(Conf->console_win, 2,1, "ERROR: Cannot fork child SST process; check the path");
+    wrefresh(Conf->console_win);
+    close(Conf->filedes[1]);
+    close(Conf->filedes[0]);
+    return false;
+  }else if( Conf->pid == 0 ){
+    // child process
+    while ((dup2(Conf->filedes[1], STDOUT_FILENO) == -1) && (errno == EINTR)) {}
+    close(Conf->filedes[1]);
+    close(Conf->filedes[0]);
+    if( execl("/", Conf->sst.c_str(), (char*)0) == -1 ){
+      mvwprintw(Conf->console_win, 2,1, "ERROR: Encountered error in executing SST; check the path");
+      wrefresh(Conf->console_win);
+      wrefresh(Conf->console_win);
+      return false;
+    }
+  }
+  close(Conf->filedes[1]);
+
   return false;
 }
 
@@ -96,6 +153,12 @@ bool ProcessCommand(DBGCFG &Conf, char *str){
   unsigned i = 0;
   bool (*func)(DBGCFG *);
 
+  // main command loop
+  //
+  // if a function returns "true" then either an error
+  // has occurred or the user has asked to exit
+  //
+  // if we exit the do-while loop, then the command was not found
   do{
     if( TmpCmd == Cmds[i].cmd ){
       // execute it
@@ -165,6 +228,10 @@ void InitConfig(DBGCFG &Conf){
   Conf.console_startx = LINES-CONSOLE_WIN_YDIM;
   Conf.console_starty = 1;
 
+  Conf.pid            = -1;
+  Conf.filedes[0]     = -1;
+  Conf.filedes[1]     = -1;
+
   // create the windows
   Conf.msg_win      = newwin(Conf.msg_rows, Conf.msg_cols,
                              Conf.msg_starty, Conf.msg_startx);
@@ -184,10 +251,62 @@ void InitConfig(DBGCFG &Conf){
   wrefresh(Conf.msg_win);
 }
 
+bool ParseArgs(int argc, char **argv, DBGCFG &Conf){
+  // set the default program opts
+  Conf.isHelp = false;
+
+  for( int i=1; i<argc; i++ ){
+    std::string s(argv[i]);
+
+    if( (s=="-h") || (s=="-help") || (s=="--help") ){
+      // help selected
+      Conf.isHelp = true;
+      return true;
+    }else if( s=="--" ){
+      // start parsing the SST args
+      std::string TmpSST;
+      if( i+1 > (argc-1) ){
+        std::cout << "Error : no SST arguments found" << std::endl;
+        return false;
+      }
+      for( unsigned j=(i+1); j<argc; j++ ){
+        std::string Tmp(argv[j]);
+        TmpSST += Tmp;
+        TmpSST += " ";
+      }
+      Conf.sst = TmpSST;
+    }else{
+      // parsing error
+      std::cout << "Error : unknown option : " << s << std::endl;
+      std::cout << "Use \"--help\" for the help menu" << std::endl;
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void PrintHelp(){
+  std::cout << " Usage: sst-dbg -- /path/to/sst arg1 arg2 arg3 ..." << std::endl;
+  std::cout << " Options:" << std::endl;
+  std::cout << "\t-h|-help|--help                      : Print help menu" << std::endl;
+}
+
 int main(int argc, char **argv){
   DBGCFG Conf;
+
+  if( !ParseArgs(argc, argv, Conf) ){
+    return false;
+  }
+
+  if( Conf.isHelp ){
+    PrintHelp();
+    return 0;
+  }
+
   InitConfig(Conf);
   Console(Conf);
+
   return 0;
 }
 
