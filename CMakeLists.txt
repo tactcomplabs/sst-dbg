@@ -12,6 +12,32 @@
 cmake_minimum_required (VERSION 2.6)
 project(sst-dbg CXX)
 
+
+#--- SETUP BUILD ENV
+find_program(SST_CONFIG sst-config)
+if(NOT SST_CONFIG)
+  message(FATAL_ERROR "No sst-config found in the current path")
+endif()
+
+message(STATUS "Using sst-config at ${SST_CONFIG}")
+
+execute_process (
+  COMMAND bash -c "${SST_CONFIG} --CXXFLAGS"
+  OUTPUT_VARIABLE SST_CXX_FLAGS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process (
+  COMMAND bash -c "${SST_CONFIG} --includedir"
+  OUTPUT_VARIABLE SST_INCLUDE_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")
+message(STATUS "SST header path set to: ${SST_INCLUDE_DIR}")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SST_CXX_FLAGS}")
+
 add_subdirectory(src)
 
 # EOF

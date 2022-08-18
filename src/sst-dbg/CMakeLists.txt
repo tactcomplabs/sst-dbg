@@ -9,5 +9,17 @@
 # this distribution.
 #
 
+set(SSTDebugSrcs
+SSTDebug.h
+SSTDebug.cpp
+)
+
+include_directories( . )
+include_directories(${SST_INCLUDE_DIR})
+
+add_library(SSTDebug STATIC ${SSTDebugSrcs})
+
+install(TARGETS SSTDebug DESTINATION lib)
+install(DIRECTORY ./ DESTINATION include FILES_MATCHING PATTERN "*.h")
 
 # EOF

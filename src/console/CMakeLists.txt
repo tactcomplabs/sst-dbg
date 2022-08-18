@@ -15,7 +15,7 @@ main.cpp
 
 include_directories( . )
 add_executable(sst-dbg ${CONSOLE_SRCS})
-target_link_libraries(sst-dbg ncurses)
+target_link_libraries(sst-dbg ncurses SSTDebug)
 install(TARGETS sst-dbg DESTINATION bin)
 
 # EOF
