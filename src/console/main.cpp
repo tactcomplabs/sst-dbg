@@ -21,6 +21,8 @@
 #include <sys/types.h>
 #include <ncurses.h>
 
+#include "SSTDebug.h"
+
 // Data structures
 typedef struct{
 

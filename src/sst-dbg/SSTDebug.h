@@ -13,10 +13,14 @@
 #include <iostream>
 #include <typeinfo>
 #include <string>
+#include <vector>
+#include <cstdarg>
+#include <typelist.hpp>
 
-// -- SST Headers
-#include <sst/core/sst_config.h>
-#include <sst/core/component.h>
+// -- Required Macros
+#define SSTCYCLE  uint64_t
+
+using namespace tl;
 
 class SSTDebug {
 private:
@@ -26,10 +30,6 @@ private:
   std::string Path;       ///< Output path
 
   /// SSTDebug: SST internal type derivation
-  template <typename T>
-  std::type_info getType(T t){
-    return typeid(t).name();
-  }
 
 public:
   /// SSTDebug: SST Debug constructor
@@ -45,12 +45,8 @@ public:
   ~SSTDebug();
 
   /// SSTDebug: SST Debug data dump
-  template<SST::Cycle_t, typename T, typename... Args>
-  bool dump(SST::Cycle_t currentCycle, T t, Args... args){
-    getType(args...);
-    return true;
+  void dump(SSTCYCLE cycle, tl::type_list<> list){
   }
-
 };
 
 // EOF

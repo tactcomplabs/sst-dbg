@@ -33,11 +33,21 @@ execute_process (
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+execute_process (
+  COMMAND bash -c "${SST_CONFIG} --ELEMENT_LDFLAGS"
+  OUTPUT_VARIABLE SST_ELEMENT_LDFLAGS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")
 message(STATUS "SST header path set to: ${SST_INCLUDE_DIR}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SST_CXX_FLAGS}")
+set(SSTDBG_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/sst-dbg")
+
+enable_testing()
 
 add_subdirectory(src)
+add_subdirectory(test)
 
 # EOF
