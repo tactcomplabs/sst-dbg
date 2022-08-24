@@ -30,6 +30,10 @@ private:
   std::string Path;       ///< Output path
 
   /// SSTDebug: SST internal type derivation
+  template<typename T>
+  void __internal_dump(T v){
+    // register the variable 'v' of type 'T'
+  }
 
 public:
   /// SSTDebug: SST Debug constructor
@@ -45,7 +49,8 @@ public:
   ~SSTDebug();
 
   /// SSTDebug: SST Debug data dump
-  void dump(SSTCYCLE cycle, tl::type_list<> list){
+  template<typename T, typename... Args>
+  void dump(SSTCYCLE cycle, tl::type_list<> list, T first, Args... args){
   }
 };
 
