@@ -15,12 +15,11 @@
 #include <string>
 #include <vector>
 #include <cstdarg>
-#include <typelist.hpp>
+#include <stdarg.h>
+#include <typeinfo>
 
 // -- Required Macros
 #define SSTCYCLE  uint64_t
-
-using namespace tl;
 
 class SSTDebug {
 private:
@@ -29,10 +28,30 @@ private:
   std::string Name;       ///< Name of the component
   std::string Path;       ///< Output path
 
-  /// SSTDebug: SST internal type derivation
+  std::ofstream Bin;      ///< Binary output
+
+  template<typename T>
+  void __internal_dump(){
+  }
+
   template<typename T>
   void __internal_dump(T v){
-    // register the variable 'v' of type 'T'
+    Bin << v << std::endl;
+  }
+
+  template<typename T, typename U, typename... Args>
+  bool __internal_dump(T t, U u, Args... args){
+    Bin << t << ":" << u << std::endl;
+  }
+
+  template<typename... Args>
+  void __internal_dump(Args... args){
+    //__internal_dump(args...);
+  }
+
+  template<typename T1, typename T2>
+  void __internal_dump(T1 v1, T2 v2){
+    Bin << v1 << ":" << v2 << std::endl;
   }
 
 public:
@@ -48,9 +67,17 @@ public:
   /// SSTDebug: SST Debug destructor
   ~SSTDebug();
 
-  /// SSTDebug: SST Debug data dump
-  template<typename T, typename... Args>
-  void dump(SSTCYCLE cycle, tl::type_list<> list, T first, Args... args){
+  /// SSTDebug: SST Debug data dump function
+  template<typename T, typename U, typename... Args>
+  bool dump(SSTCYCLE cycle, T t, U u, Args... args){
+
+    std::string BinName = Name + "." + std::to_string(cycle) + ".out";
+    Bin.open(BinName.c_str(), std::ios::out);
+
+    Bin << t << ":" << u << std::endl;
+    __internal_dump(args...);
+
+    Bin.close();
   }
 };
 

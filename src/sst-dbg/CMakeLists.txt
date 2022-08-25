@@ -12,7 +12,6 @@
 set(SSTDebugSrcs
 SSTDebug.h
 SSTDebug.cpp
-typelist.hpp
 )
 
 include_directories( . )
