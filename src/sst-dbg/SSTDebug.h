@@ -21,6 +21,9 @@
 // -- Required Macros
 #define SSTCYCLE  uint64_t
 
+#define VARNAME(v) #v
+#define DARG(v) VARNAME(v), v
+
 class SSTDebug {
 private:
 
@@ -46,7 +49,6 @@ private:
 
   template<typename... Args>
   void __internal_dump(Args... args){
-    //__internal_dump(args...);
   }
 
   template<typename T1, typename T2>

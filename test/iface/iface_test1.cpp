@@ -25,6 +25,8 @@ int main( int argc, char **argv ){
 
   Dbg.dump(CYCLE, "FOO", FOO);
   Dbg.dump(CYCLE+1, "FOO", FOO, "BAR", BAR);
+  Dbg.dump(CYCLE+2, DARG(FOO));
+  Dbg.dump(CYCLE+3, DARG(FOO), DARG(BAR));
 
   std::cout << "PASS" << std::endl;
 
