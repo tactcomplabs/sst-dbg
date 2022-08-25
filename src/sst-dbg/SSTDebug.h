@@ -75,11 +75,15 @@ public:
 
     std::string BinName = Name + "." + std::to_string(cycle) + ".out";
     Bin.open(BinName.c_str(), std::ios::out);
+    if( !Bin.is_open() )
+      return false;
 
     Bin << t << ":" << u << std::endl;
     __internal_dump(args...);
 
     Bin.close();
+
+    return true;
   }
 };
 
