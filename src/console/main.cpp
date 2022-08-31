@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <ncurses.h>
 
 #include "SSTDebug.h"
@@ -76,6 +77,7 @@ CMDHANDLER Cmds[] = {
   {"help",  CmdHelp,  false},
   {"null",  nullptr,  true}
 };
+
 
 #define CONSOLE_WIN_YDIM  5
 #define MAX_STR           1024
@@ -169,6 +171,38 @@ bool ProcessCommand(DBGCFG &Conf, char *str){
     }
     i++;
   }while( !Cmds[i].end );
+
+  // check to see if we need to resize the window
+  struct winsize winsz;
+  ioctl(0,TIOCGWINSZ, &winsz);
+
+  if( (winsz.ws_row != Conf.rows) ||
+      (winsz.ws_col != Conf.cols) ){
+    Conf.rows = winsz.ws_row;
+    Conf.cols = winsz.ws_col;
+
+    Conf.msg_rows       = Conf.rows-CONSOLE_WIN_YDIM-1;
+    Conf.msg_cols       = Conf.cols-1;
+    Conf.msg_starty     = 1;
+    Conf.msg_startx     = 1;
+
+    Conf.console_rows   = CONSOLE_WIN_YDIM;
+    Conf.console_cols   = Conf.cols-1;
+    Conf.console_startx = Conf.rows-CONSOLE_WIN_YDIM;
+    Conf.console_starty = 1;
+
+    wresize(Conf.console_win, Conf.console_rows, Conf.console_cols);
+    wresize(Conf.msg_win, Conf.msg_rows, Conf.msg_cols);
+
+    refresh();
+
+    move(Conf.rows-(CONSOLE_WIN_YDIM-1), 4);
+    wrefresh(Conf.console_win);
+    wrefresh(Conf.msg_win);
+
+    return false;
+  }
+
   mvwprintw(Conf.console_win, 2,1, "ERROR: UNKNOWN COMMAND:");
   mvwprintw(Conf.console_win, 3,1, str);
   wrefresh(Conf.console_win);
@@ -191,7 +225,7 @@ void Console(DBGCFG &Conf){
   // main console loop
   while(!done){
     getstr(str);
-    move(LINES-(CONSOLE_WIN_YDIM-1), 4);
+    move(Conf.rows-(CONSOLE_WIN_YDIM-1), 4);
     wrefresh(Conf.console_win);
     wclear(Conf.console_win);
     box(Conf.console_win, 0, 0);
@@ -209,25 +243,34 @@ void Console(DBGCFG &Conf){
 
 void InitConfig(DBGCFG &Conf){
 
-  // initialization ncurses
+  struct winsize winsz;
+  int MYLINES = 0;
+  int MYCOLS = 0;
+
+  // initialize ncurses
   initscr();
   nocbreak();
+
+  // retrieve the window size
+  ioctl(0,TIOCGWINSZ, &winsz);
+  MYLINES = winsz.ws_row;
+  MYCOLS = winsz.ws_col;
 
   // enable F1, F2, etc...
   keypad(stdscr, TRUE);
 
   // init the internal data structure
-  Conf.rows = LINES;
-  Conf.cols = COLS;
+  Conf.rows = MYLINES;
+  Conf.cols = MYCOLS;
 
-  Conf.msg_rows       = LINES-CONSOLE_WIN_YDIM-1;
-  Conf.msg_cols       = COLS-1;
+  Conf.msg_rows       = MYLINES-CONSOLE_WIN_YDIM-1;
+  Conf.msg_cols       = MYCOLS-1;
   Conf.msg_starty     = 1;
   Conf.msg_startx     = 1;
 
   Conf.console_rows   = CONSOLE_WIN_YDIM;
-  Conf.console_cols   = COLS-1;
-  Conf.console_startx = LINES-CONSOLE_WIN_YDIM;
+  Conf.console_cols   = MYCOLS-1;
+  Conf.console_startx = MYLINES-CONSOLE_WIN_YDIM;
   Conf.console_starty = 1;
 
   Conf.pid            = -1;
@@ -248,7 +291,7 @@ void InitConfig(DBGCFG &Conf){
   box(Conf.msg_win, 0, 0);
 
   // move the cursor
-  move(LINES-(CONSOLE_WIN_YDIM-1), 4);
+  move(MYLINES-(CONSOLE_WIN_YDIM-1), 4);
   wrefresh(Conf.console_win);
   wrefresh(Conf.msg_win);
 }
@@ -289,12 +332,14 @@ bool ParseArgs(int argc, char **argv, DBGCFG &Conf){
 }
 
 void PrintHelp(){
-  std::cout << " Usage: sst-dbg -- /path/to/sst arg1 arg2 arg3 ..." << std::endl;
+  std::cout << " Usage: sst-dbg [OPTIONS] -- /path/to/sst arg1 arg2 arg3 ..." << std::endl;
   std::cout << " Options:" << std::endl;
   std::cout << "\t-h|-help|--help                      : Print help menu" << std::endl;
+  std::cout << "\t-i|-iter|--iter sec                  : Dump the state every `sec` seconds" << std::endl;
 }
 
 int main(int argc, char **argv){
+
   DBGCFG Conf;
 
   if( !ParseArgs(argc, argv, Conf) ){
