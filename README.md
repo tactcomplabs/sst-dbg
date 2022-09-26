@@ -11,3 +11,7 @@ $> cmake -DBUILD_ALL_TESTING=ON ../
 $> make -j
 $> make test
 ```
+
+## Build options
+* -DBUILD\_ALL\_TESTING=ON : builds the test suite
+* -DSSTDBG\_ASCII=ON : Enables ASCII output (default is JSON)

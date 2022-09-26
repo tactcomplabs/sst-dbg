@@ -39,6 +39,10 @@ project(sst-dbg CXX)
 #  OUTPUT_STRIP_TRAILING_WHITESPACE
 #)
 
+if(SSTDBG_ASCII)
+  add_definitions(-DSSTDBG_ASCII=1)
+endif()
+
 set(SST_CXX_FLAGS "-std=c++1y -D__STDC_FORMAT_MACROS")
 set(SST_INCLUDE_DIR "")
 
