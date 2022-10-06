@@ -17,6 +17,7 @@
 #include <cstdarg>
 #include <stdarg.h>
 #include <typeinfo>
+#include <dirent.h>
 
 // -- Required Macros
 #define SSTCYCLE  uint64_t
@@ -78,10 +79,36 @@ public:
   void setPath(std::string P){ Path = P; }
 
   /// SSTDebug: SST Debug retrieve the set of current clock values
+  std::vector<SSTCYCLE> GetClockVals(){
+  }
 
   /// SSTDebug: SST Debug retrieve the set of current output clocks for the target component
+  std::vector<SSTCYCLE> GetClockValsByComponent(){
+  }
 
   /// SSTDebug: SST Debug retrieve the set of current component names
+  std::vector<SSTCYCLE> GetComponents(){
+    DIR *dir;
+    struct dirent *ent;
+#ifdef SSTBG_ASCII
+    std::string delim = ".out";
+#else
+    std::string delim = ".json";
+#endif
+    std::vector<SSTCYCLE> v;
+
+    if((dir = opendir(Path.c_str())) != NULL){
+      while((ent = readdir(dir)) != NULL){
+        std::string tmp(ent->d_name);
+        if(tmp.find(delim.c_str()) != std::string::npos){
+          // positive match, split the name
+        }
+      }
+      closedir(dir);
+    }
+
+    return v;
+  }
 
   /// SSTDebug: SST Debug retrieve the values from the target component at the target clock cycle
 

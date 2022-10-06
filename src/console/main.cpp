@@ -65,17 +65,20 @@ bool CmdKill(DBGCFG* Conf);     // Kill the running SST sim
 bool CmdPause(DBGCFG* Conf);    // Pause the SST sim
 bool CmdHelp(DBGCFG* Conf);     // Print the help menu
 bool CmdClear(DBGCFG* Conf);    // Clear the message screen
+bool CmdSSTEnv(DBGCFG* Conf);   // Prints the SST runtime environment
 
 // Command list
 CMDHANDLER Cmds[] = {
-  {"run",   CmdRun,   false},
-  {"dump",  CmdDump,  false},
-  {"kill",  CmdKill,  false},
-  {"pause", CmdPause, false},
-  {"exit",  CmdExit,  false},
-  {"clear", CmdClear, false},
-  {"help",  CmdHelp,  false},
-  {"null",  nullptr,  true}
+  {"run",     CmdRun,     false},
+  {"dump",    CmdDump,    false},
+  {"kill",    CmdKill,    false},
+  {"pause",   CmdPause,   false},
+  {"exit",    CmdExit,    false},
+  {"quit",    CmdExit,    false},
+  {"clear",   CmdClear,   false},
+  {"sstenv",  CmdSSTEnv,  false},
+  {"help",    CmdHelp,    false},
+  {"null",    nullptr,    true}
 };
 
 
@@ -84,7 +87,7 @@ CMDHANDLER Cmds[] = {
 
 bool CmdHelp(DBGCFG* Conf){
   mvwprintw(Conf->console_win, 2,3,
-            "Commands: run dump kill pause clear exit help");
+            "Commands: run dump kill pause clear exit sstenv help");
   wrefresh(Conf->console_win);
   return false;
 }
@@ -149,6 +152,12 @@ bool CmdRun(DBGCFG* Conf){
 }
 
 bool CmdDump(DBGCFG* Conf){
+  return false;
+}
+
+bool CmdSSTEnv(DBGCFG* Conf){
+  mvwprintw(Conf->console_win, 2,1, Conf->sst.c_str());
+  wrefresh(Conf->console_win);
   return false;
 }
 
@@ -319,6 +328,7 @@ bool ParseArgs(int argc, char **argv, DBGCFG &Conf){
         TmpSST += Tmp;
         TmpSST += " ";
       }
+      i=argc; // end the parser
       Conf.sst = TmpSST;
     }else{
       // parsing error
