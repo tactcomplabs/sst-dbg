@@ -8,6 +8,9 @@
 // See LICENSE in the top level directory for licensing details
 //
 
+#ifndef _SSTDEBUG_H_
+#define _SSTDEBUG_H_
+
 // -- CXX Headers
 #include <fstream>
 #include <iostream>
@@ -18,6 +21,7 @@
 #include <stdarg.h>
 #include <typeinfo>
 #include <dirent.h>
+#include <algorithm>
 
 // -- Required Macros
 #define SSTCYCLE  uint64_t
@@ -31,8 +35,7 @@ private:
   // Private variables
   std::string Name;       ///< Name of the component
   std::string Path;       ///< Output path
-
-  std::ofstream Bin;      ///< Binary output
+  std::ofstream Bin;      ///< Output stream
 
   template<typename T>
   void __internal_dump(){
@@ -62,18 +65,42 @@ private:
 #endif
   }
 
+  void SplitStr(const std::string &s, char delim,
+                std::vector<std::string>& v){
+    auto i = 0;
+    auto pos = s.find(delim);
+    if( pos == std::string::npos ){
+      v.push_back(s.substr(i,s.length()));
+    }
+    while( pos != std::string::npos ){
+      v.push_back(s.substr(i,pos-i));
+      i = ++pos;
+      pos = s.find(delim,pos);
+      if( pos == std::string::npos ){
+        v.push_back(s.substr(i,s.length()));
+      }
+    }
+  }
+
 public:
+
   /// SSTDebug: SST Debug constructor
-  SSTDebug();
+  SSTDebug()
+    : Name("."), Path("."){
+  }
 
   /// SSTDebug: SST Debug overloaded constructor
-  SSTDebug(std::string Name);
+  SSTDebug(std::string Name)
+    : Name(Name), Path("./"){
+  }
 
   /// SSTDebug: SST Debug overloaded constructor
-  SSTDebug(std::string Name, std::string Path);
+  SSTDebug(std::string Name, std::string Path)
+    : Name(Name), Path(Path){
+  }
 
   /// SSTDebug: SST Debug destructor
-  ~SSTDebug();
+  ~SSTDebug(){}
 
   /// SSTDebug: SST Debug set the path
   void setPath(std::string P){ Path = P; }
@@ -83,29 +110,52 @@ public:
   }
 
   /// SSTDebug: SST Debug retrieve the set of current output clocks for the target component
-  std::vector<SSTCYCLE> GetClockValsByComponent(){
+  std::vector<SSTCYCLE> GetClockValsByComponent(std::string Component){
   }
 
   /// SSTDebug: SST Debug retrieve the set of current component names
-  std::vector<SSTCYCLE> GetComponents(){
+  std::vector<std::string> GetComponents(){
     DIR *dir;
     struct dirent *ent;
-#ifdef SSTBG_ASCII
+#ifdef SSTDBG_ASCII
     std::string delim = ".out";
 #else
     std::string delim = ".json";
 #endif
-    std::vector<SSTCYCLE> v;
+    std::vector<std::string> v;
 
     if((dir = opendir(Path.c_str())) != NULL){
       while((ent = readdir(dir)) != NULL){
         std::string tmp(ent->d_name);
         if(tmp.find(delim.c_str()) != std::string::npos){
           // positive match, split the name
+          std::vector<std::string> TmpV;
+          SplitStr(tmp,'.',TmpV);
+
+          // we have the vector of tokens,
+          // concat everything until we find an integer
+          std::string FinalStr;
+          unsigned i = 0;
+          unsigned pos = 0;
+          while( (i<TmpV.size()) &&
+                 (!TmpV[i].empty()) &&
+                 (std::all_of(TmpV[i].begin(), TmpV[i].end(), ::isdigit))){
+            pos = i;
+          }
+          FinalStr = TmpV[0];
+          for( unsigned i=1; i<pos; i++ ){
+            FinalStr += ".";
+            FinalStr += TmpV[i];
+          }
+
+          v.push_back(FinalStr);
         }
       }
       closedir(dir);
     }
+
+    // make the vector unique
+    v.erase( std::unique( v.begin(), v.end() ), v.end() );
 
     return v;
   }
@@ -144,5 +194,7 @@ public:
     return true;
   }
 };
+
+#endif  // #ifndef _SSTDEBUG_H_
 
 // EOF

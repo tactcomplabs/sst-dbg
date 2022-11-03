@@ -44,6 +44,7 @@ if(SSTDBG_ASCII)
 endif()
 
 set(SST_CXX_FLAGS "-std=c++1y -D__STDC_FORMAT_MACROS")
+set( CMAKE_CXX_STANDARD 14 )
 set(SST_INCLUDE_DIR "")
 
 message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")

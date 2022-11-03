@@ -11,19 +11,18 @@
 
 set(SSTDebugSrcs
 SSTDebug.h
-SSTDebug.cpp
 )
 
 include_directories( . )
 include_directories(${SST_INCLUDE_DIR})
 
-set(CMAKE_SHARED_LINKER_FLAGS
-  "${CMAKE_SHARED_LINKER_FLAGS} ${SST_ELEMENT_LDFLAGS}")
+#set(CMAKE_SHARED_LINKER_FLAGS
+#  "${CMAKE_SHARED_LINKER_FLAGS} ${SST_ELEMENT_LDFLAGS}")
 
-add_library(SSTDebug SHARED ${SSTDebugSrcs})
-set_property(TARGET SSTDebug PROPERTY POSITION_INDEPENDENT_CODE ON)
+#add_library(SSTDebug SHARED ${SSTDebugSrcs})
+#set_property(TARGET SSTDebug PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-install(TARGETS SSTDebug DESTINATION lib)
+#install(TARGETS SSTDebug DESTINATION lib)
 install(DIRECTORY ./ DESTINATION include FILES_MATCHING PATTERN "*.h")
 
 # EOF

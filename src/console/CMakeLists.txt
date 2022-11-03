@@ -17,7 +17,7 @@ include_directories( . )
 include_directories(${SSTDBG_INCLUDE_PATH})
 include_directories(${SST_INCLUDE_DIR})
 add_executable(sst-dbg ${CONSOLE_SRCS})
-target_link_libraries(sst-dbg ncurses SSTDebug)
+target_link_libraries(sst-dbg ncurses)
 install(TARGETS sst-dbg DESTINATION bin)
 
 # EOF

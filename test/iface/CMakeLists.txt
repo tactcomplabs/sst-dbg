@@ -26,7 +26,7 @@ if(BUILD_SSTDBG_IFACE_TESTING)
     add_executable(${testName} ${testSrc})
 
     # Add linker deps
-    target_link_libraries(${testName} SSTDebug)
+    #target_link_libraries(${testName} SSTDebug)
 
     # Drop the exe's in a separate directory
     set_target_properties(${testName} PROPERTIES
