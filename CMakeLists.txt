@@ -14,30 +14,18 @@ project(sst-dbg CXX)
 
 
 #--- SETUP BUILD ENV
-#find_program(SST_CONFIG sst-config)
-#if(NOT SST_CONFIG)
-#  message(FATAL_ERROR "No sst-config found in the current path")
-#endif()
+find_program(SST_CONFIG sst-config)
+if(NOT SST_CONFIG)
+  message(FATAL_ERROR "No sst-config found in the current path")
+endif()
 
-#message(STATUS "Using sst-config at ${SST_CONFIG}")
+message(STATUS "Using sst-config at ${SST_CONFIG}")
 
-#execute_process (
-#  COMMAND bash -c "${SST_CONFIG} --CXXFLAGS"
-#  OUTPUT_VARIABLE SST_CXX_FLAGS
-#  OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
-
-#execute_process (
-#  COMMAND bash -c "${SST_CONFIG} --includedir"
-#  OUTPUT_VARIABLE SST_INCLUDE_DIR
-#  OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
-
-#execute_process (
-#  COMMAND bash -c "${SST_CONFIG} --ELEMENT_LDFLAGS"
-#  OUTPUT_VARIABLE SST_ELEMENT_LDFLAGS
-#  OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
+execute_process (
+  COMMAND bash -c "${SST_CONFIG} --includedir"
+  OUTPUT_VARIABLE SST_INCLUDE_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 if(SSTDBG_ASCII)
   add_definitions(-DSSTDBG_ASCII=1)
@@ -46,6 +34,7 @@ endif()
 set(SST_CXX_FLAGS "-std=c++1y -D__STDC_FORMAT_MACROS")
 set( CMAKE_CXX_STANDARD 14 )
 set(SST_INCLUDE_DIR "")
+set(CMAKE_INSTALL_PREFIX "${SST_INCLUDE_DIR}/sst/dbg")
 
 message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")
 message(STATUS "SST header path set to: ${SST_INCLUDE_DIR}")
