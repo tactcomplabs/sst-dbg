@@ -215,6 +215,7 @@ bool ProcessCommand(DBGCFG &Conf, char *str){
   mvwprintw(Conf.console_win, 2,1, "ERROR: UNKNOWN COMMAND:");
   mvwprintw(Conf.console_win, 3,1, str);
   wrefresh(Conf.console_win);
+  refresh();
 
   return false;
 }

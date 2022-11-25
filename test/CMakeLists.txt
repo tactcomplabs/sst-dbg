@@ -18,9 +18,11 @@ if(BUILD_ALL_TESTING)
     message(FATAL_ERROR "COULD NOT FIND SST")
   endif ()
 
-  set(BUILD_SSTDBG_IFACE_TESTING "ON")
+  set(BUILD_SSTDBG_IFACE_JSON_TESTING "ON")
+  set(BUILD_SSTDBG_IFACE_ASCII_TESTING "ON")
 endif()
 
-add_subdirectory(iface)
+add_subdirectory(iface_json)
+add_subdirectory(iface_ascii)
 
 # EOF

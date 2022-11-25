@@ -12,21 +12,15 @@
 include_directories(${SSTDBG_INCLUDE_PATH})
 include_directories(${SST_INCLUDE_DIR})
 
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SST_ELEMENT_LDFLAGS}")
-#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
-if(BUILD_SSTDBG_IFACE_TESTING)
+if(BUILD_SSTDBG_IFACE_JSON_TESTING)
   foreach(testSrc ${TEST_SRCS})
     # Extract the file name
     get_filename_component(testName ${testSrc} NAME_WE)
 
     # Add compile target
     add_executable(${testName} ${testSrc})
-
-    # Add linker deps
-    #target_link_libraries(${testName} SSTDebug)
 
     # Drop the exe's in a separate directory
     set_target_properties(${testName} PROPERTIES

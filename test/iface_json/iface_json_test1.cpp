@@ -1,5 +1,5 @@
 //
-// iface_test1.cpp
+// iface_json_test1.cpp
 //
 // Copyright (C) 2017-2022 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -12,10 +12,10 @@
 #include <string>
 #include "SSTDebug.h"
 
-std::string TEST_NAME = "iface_test1";
+std::string TEST_NAME = "iface_json_test1";
 
 int main( int argc, char **argv ){
-  std::cout << "TEST = " << TEST_NAME << std::endl;
+  std::cout << "TEST = " << __FILE__ << std::endl;
 
   SSTDebug Dbg(TEST_NAME,"./");
 
