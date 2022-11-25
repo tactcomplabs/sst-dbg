@@ -25,6 +25,7 @@
 
 // -- Required Macros
 #define SSTCYCLE  uint64_t
+#define SSTVALUE  std::vector<std::pair<std::string,std::string>>
 
 #define VARNAME(v) #v
 #define DARG(v) VARNAME(v), v
@@ -84,6 +85,69 @@ private:
     }
   }
 
+  /// SSTDebug: SST Debug retrieve the values from the ASCII target component at the target clock cycle
+  SSTVALUE GetASCIIDebugValues(std::string Component,
+                               SSTCYCLE Cycle){
+    SSTVALUE v;
+    std::ifstream Input;
+    std::string BinName = Component + "." + std::to_string(Cycle) + ".out";
+    Input.open(BinName.c_str(), std::ios::out);
+    if( !Input.is_open() )
+      return v;
+
+    std::string line;
+    std::vector<std::string> tmp;
+    while( std::getline(Input,line) ){
+      // split the line into two tokens: CSV format
+      SplitStr(line,',',tmp);
+      if( tmp.size() == 2 ){
+        v.push_back(std::pair<std::string,std::string>(tmp[0],tmp[1]));
+      }
+      tmp.clear();
+    }
+
+    Input.close();
+    return v;
+  }
+
+  /// SSTDebug: SST Debug retrieve the values from the JSON target component at the target clock cycle
+  SSTVALUE GetJSONDebugValues(std::string Component,
+                              SSTCYCLE Cycle){
+    SSTVALUE v;
+    std::ifstream Input;
+    std::string BinName = Component + "." + std::to_string(Cycle) + ".json";
+    Input.open(BinName.c_str(), std::ios::out);
+    if( !Input.is_open() )
+      return v;
+
+    std::string line;
+    std::vector<std::string> tmp;
+    // retrieve the first line
+    std::getline(Input,line);
+    if( line != "}" ){
+      Input.close();
+      return v;
+    }
+
+    while( std::getline(Input,line) ){
+      if( line == "}" ){
+        Input.close();
+        return v;
+      }
+      SplitStr(line,':',tmp);
+      if( tmp.size() == 2 ){
+        tmp[0].erase(std::remove(tmp[0].begin(),tmp[0].end(),'\"'),tmp[0].end());
+        tmp[1].erase(std::remove(tmp[1].begin(),tmp[1].end(),'\"'),tmp[1].end());
+        tmp[1].erase(std::remove(tmp[1].begin(),tmp[1].end(),','),tmp[1].end());
+        v.push_back(std::pair<std::string,std::string>(tmp[0],tmp[1]));
+      }
+      tmp.clear();
+    }
+
+    Input.close();
+    return v;
+  }
+
 public:
 
   /// SSTDebug: SST Debug constructor
@@ -141,6 +205,24 @@ public:
 
   /// SSTDebug: SST Debug set the path
   void setPath(std::string P){ Path = P; }
+
+  /// SSTDebug: Determines if the driving application is using ASCII output
+  bool IsASCII(){
+#ifdef SSTDBG_ASCII
+    return true;
+#else
+    return false;
+#endif
+  }
+
+  /// SSTDebug: Determines if the driving application is using JSON output
+  bool IsJSON(){
+#ifdef SSTDBG_ASCII
+    return false;
+#else
+    return true;
+#endif
+  }
 
   /// SSTDebug: SST Debug retrieve the set of current clock values
   std::vector<SSTCYCLE> GetClockVals(){
@@ -278,8 +360,13 @@ public:
   }
 
   /// SSTDebug: SST Debug retrieve the values from the target component at the target clock cycle
-  std::vector<std::pair<std::string,std::string>> GetDebugValues(std::string Component,
-                                                                 SSTCYCLE Cycle){
+  SSTVALUE GetDebugValues(std::string Component,
+                          SSTCYCLE Cycle){
+#ifdef SSTDBG_ASCII
+    return GetASCIIDebugValues(Component,Cycle);
+#else
+    return GetJSONDebugValues(Component,Cycle);
+#endif
   }
 };
 
