@@ -91,7 +91,7 @@ private:
     SSTVALUE v;
     std::ifstream Input;
     std::string BinName = Component + "." + std::to_string(Cycle) + ".out";
-    Input.open(BinName.c_str(), std::ios::out);
+    Input.open(BinName.c_str());
     if( !Input.is_open() )
       return v;
 
@@ -116,7 +116,7 @@ private:
     SSTVALUE v;
     std::ifstream Input;
     std::string BinName = Component + "." + std::to_string(Cycle) + ".json";
-    Input.open(BinName.c_str(), std::ios::out);
+    Input.open(BinName.c_str());
     if( !Input.is_open() )
       return v;
 
@@ -152,7 +152,7 @@ public:
 
   /// SSTDebug: SST Debug constructor
   SSTDebug()
-    : Name("."), Path("."){
+    : Name("SSTDBG"), Path("./"){
   }
 
   /// SSTDebug: SST Debug overloaded constructor

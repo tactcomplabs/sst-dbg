@@ -27,17 +27,25 @@ execute_process (
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+execute_process(
+  COMMAND bash -c "${SST_CONFIG} --bindir"
+  OUTPUT_VARIABLE SST_BIN_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 if(SSTDBG_ASCII)
   add_definitions(-DSSTDBG_ASCII=1)
 endif()
 
+set(SST_DBG_HEADER_INSTALL_PATH "${SST_INCLUDE_DIR}/sst/dbg")
+
 set(SST_CXX_FLAGS "-std=c++1y -D__STDC_FORMAT_MACROS")
-set( CMAKE_CXX_STANDARD 14 )
+set(CMAKE_CXX_STANDARD 14)
 set(SST_INCLUDE_DIR "")
-set(CMAKE_INSTALL_PREFIX "${SST_INCLUDE_DIR}/sst/dbg")
 
 message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")
 message(STATUS "SST header path set to: ${SST_INCLUDE_DIR}")
+message(STATUS "SST bin path set to ${SST_BIN_DIR}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SST_CXX_FLAGS}")
 set(SSTDBG_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/sst-dbg")

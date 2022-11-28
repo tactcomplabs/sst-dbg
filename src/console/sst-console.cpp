@@ -1,5 +1,5 @@
 //
-// _main_cpp_
+// _sst-dbg-console_cpp_
 //
 // Copyright (C) 2017-2022 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -343,7 +343,7 @@ bool ParseArgs(int argc, char **argv, DBGCFG &Conf){
 }
 
 void PrintHelp(){
-  std::cout << " Usage: sst-dbg [OPTIONS] -- /path/to/sst arg1 arg2 arg3 ..." << std::endl;
+  std::cout << " Usage: sst-dbg-console [OPTIONS] -- /path/to/sst arg1 arg2 arg3 ..." << std::endl;
   std::cout << " Options:" << std::endl;
   std::cout << "\t-h|-help|--help                      : Print help menu" << std::endl;
   std::cout << "\t-i|-iter|--iter sec                  : Dump the state every `sec` seconds" << std::endl;

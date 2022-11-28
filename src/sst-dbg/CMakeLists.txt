@@ -16,6 +16,6 @@ SSTDebug.h
 include_directories( . )
 include_directories(${SST_INCLUDE_DIR})
 
-install(DIRECTORY ./ DESTINATION include FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY ./ DESTINATION ${SST_DBG_HEADER_INSTALL_PATH} FILES_MATCHING PATTERN "*.h")
 
 # EOF

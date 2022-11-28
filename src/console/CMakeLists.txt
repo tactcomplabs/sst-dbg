@@ -10,14 +10,21 @@
 #
 
 set(CONSOLE_SRCS
-main.cpp
+sst-console.cpp
+)
+
+set(SSTDBG_SRCS
+sst-dbg.cpp
 )
 
 include_directories( . )
 include_directories(${SSTDBG_INCLUDE_PATH})
 include_directories(${SST_INCLUDE_DIR})
-add_executable(sst-dbg ${CONSOLE_SRCS})
-target_link_libraries(sst-dbg ncurses)
-install(TARGETS sst-dbg DESTINATION bin)
 
+add_executable(sst-dbg-console ${CONSOLE_SRCS})
+target_link_libraries(sst-dbg-console ncurses)
+install(TARGETS sst-dbg-console DESTINATION ${SST_BIN_DIR})
+
+add_executable(sst-dbg ${SSTDBG_SRCS})
+install(TARGETS sst-dbg DESTINATION ${SST_BIN_DIR})
 # EOF
