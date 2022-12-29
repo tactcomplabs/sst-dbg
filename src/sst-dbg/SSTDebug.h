@@ -38,18 +38,10 @@ private:
   std::string Path;       ///< Output path
   std::ofstream Bin;      ///< Output stream
 
-  template<typename T>
-  void __internal_dump(){
-  }
-
-  template<typename T>
-  void __internal_dump(T v){
-    Bin << v << std::endl;
-  }
-
   template<typename T, typename U, typename... Args>
   bool __internal_dump(T t, U u, Args... args){
-    Bin << t << ":" << u << std::endl;
+    __internal_dump(t,u);
+    __internal_dump(args...);
   }
 
   template<typename... Args>
