@@ -33,6 +33,7 @@ typedef struct{
   bool isIter;
   bool isRand;
   unsigned sec;
+  unsigned ArgC;
   pid_t pid;
   std::string SSTArgs;
   std::string SSTPath;
@@ -109,6 +110,7 @@ bool ParseArgs(int argc, char **argv, CLICONF &Conf){
   Conf.isIter     = false;
   Conf.isRand     = false;
   Conf.sec        = 0;
+  Conf.ArgC       = 2;
 
   for( int i=1; i<argc; i++ ){
     std::string s(argv[i]);
@@ -124,6 +126,7 @@ bool ParseArgs(int argc, char **argv, CLICONF &Conf){
         std::cout << "argc = " << argc << std::endl;
         return false;
       }
+      Conf.ArgC = i+1;  // save the start of the SST args
       for( unsigned j=(i+1); j<argc; j++ ){
         std::string Tmp(argv[j]);
         TmpSST += Tmp;
@@ -287,8 +290,10 @@ bool ParentLoop(CLICONF &Conf){
   return Exited;
 }
 
-bool ExecuteSST(CLICONF &Conf){
+bool ExecuteSST(CLICONF &Conf, char **argv){
+
   Conf.pid = fork();
+
   if( Conf.pid == -1 ){
     // error occurred
     std::cout << "Error : Cannot fork child SST process" << std::endl;
@@ -297,14 +302,10 @@ bool ExecuteSST(CLICONF &Conf){
     // child process
     std::cout << "<<SSTDBG>> Executing SST" << std::endl;
     std::cout << "<<SSTDBG>> " << Conf.SSTPath << " " << Conf.SSTArgs << std::endl;
-#if 0
-    sleep(30);
-#endif
-    if( execlp(Conf.SSTPath.c_str(),
-              "sst",
-              "./basicClock_PyModule.py",
-//              Conf.SSTArgs.c_str(),
-              (char *)(0)) == -1 ){
+    std::cout << "<<SSTDBG>> ARGC = " << Conf.ArgC << std::endl;
+
+    if( execvp(Conf.SSTPath.c_str(),
+               &argv[Conf.ArgC]) == -1 ){
       std::cout << "Error : Encountered an error with SST : " << strerror(errno) << std::endl;
       return false;
     }
@@ -341,7 +342,7 @@ int main(int argc, char **argv){
   }
 
   // Execute
-  if( !ExecuteSST(Conf) ){
+  if( !ExecuteSST(Conf,argv) ){
     return -1;
   }
 
