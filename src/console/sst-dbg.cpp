@@ -302,7 +302,6 @@ bool ExecuteSST(CLICONF &Conf, char **argv){
     // child process
     std::cout << "<<SSTDBG>> Executing SST" << std::endl;
     std::cout << "<<SSTDBG>> " << Conf.SSTPath << " " << Conf.SSTArgs << std::endl;
-    std::cout << "<<SSTDBG>> ARGC = " << Conf.ArgC << std::endl;
 
     if( execvp(Conf.SSTPath.c_str(),
                &argv[Conf.ArgC]) == -1 ){
