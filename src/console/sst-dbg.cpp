@@ -84,8 +84,9 @@ bool SetupSSTArgs(CLICONF &Conf){
     // ensure that 'sst' appears in the string
     std::vector<std::string> v2;
     SplitStr(v[0],'/',v2);
-    if( v2[v2.size()-1] != "sst" ){
-      std::cout << "Error : could not find SST executable in " << v[0] << std::endl;
+    if( (v2[v2.size()-1] != "sst") &&
+        (v2[v2.size()-1] != "mpirun") ){
+      std::cout << "Error : could not find SST or MPIRUN executables in " << v[0] << std::endl;
       return false;
     }
     Conf.SSTPath = v[0];
