@@ -242,6 +242,7 @@ void basicClock::printStatus(Output& out){
 
   // optional, call the subcomponent's printStatus
   subComp->printStatus(out);
+#endif
 }
 ```
 
