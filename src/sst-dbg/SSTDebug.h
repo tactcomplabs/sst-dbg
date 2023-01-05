@@ -39,7 +39,7 @@ private:
   std::ofstream Bin;      ///< Output stream
 
   template<typename T, typename U, typename... Args>
-  bool __internal_dump(T t, U u, Args... args){
+  void __internal_dump(T t, U u, Args... args){
     __internal_dump(t,u);
     __internal_dump(args...);
   }
@@ -181,6 +181,8 @@ public:
     Bin << "{" << std::endl;
     Bin << "\"Element\": \"" << Name << "\"," << std::endl;
     Bin << "\"Cycle\": " << cycle;
+    Bin << "," << std::endl << "\"" << t << "\": \""
+        << u << "\"";
 #endif
 
     __internal_dump(args...);
