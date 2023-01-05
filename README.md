@@ -249,6 +249,8 @@ void basicClock::printStatus(Output& out){
 ### Executing sst-dbg
 ```
 $> sst-dbg -i 10 -- sst basicTest.py
+$> sst-dbg -i 60 -- mpirun sst basicTest.py
+$> sst-dbg -i 10 -- sst --model-options="--node 10" basicTest.py
 ```
 
 ### Contributing
