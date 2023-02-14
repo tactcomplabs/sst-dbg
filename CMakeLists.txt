@@ -20,14 +20,12 @@ if(NOT SST_CONFIG)
   message(FATAL_ERROR "No sst-config found in the current path")
 endif()
 
-
+#-- SETUP MPI ENV
 find_package(MPI)
 if(MPI_FOUND)
   add_definitions(-DSSTDBG_MPI=1)
-  set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
-  message(STATUS "Setting CXX compiler to ${MPI_CXX_COMPILER}")
+  message(STATUS "Found MPI CXX at ${MPI_CXX_COMPILER}")
 endif()
-
 
 include(FetchContent)
 
