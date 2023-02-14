@@ -1,6 +1,6 @@
 # sst-dbg Top-Level CMake Description
 #
-# Copyright (C) 2017-2022 Tactical Computing Laboratories, LLC
+# Copyright (C) 2017-2023 Tactical Computing Laboratories, LLC
 # All Rights Resereved
 # contact@tactcomplabs.com
 #
@@ -18,6 +18,13 @@ set(CMAKE_CXX_STANDARD 17)
 find_program(SST_CONFIG sst-config)
 if(NOT SST_CONFIG)
   message(FATAL_ERROR "No sst-config found in the current path")
+endif()
+
+#-- SETUP MPI ENV
+find_package(MPI)
+if(MPI_FOUND)
+  add_definitions(-DSSTDBG_MPI=1)
+  message(STATUS "Found MPI CXX at ${MPI_CXX_COMPILER}")
 endif()
 
 include(FetchContent)
