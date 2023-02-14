@@ -43,7 +43,15 @@ int main(int argc, char *argv[]) {
   // ==========
   std::vector<std::string> DumpFiles = {};
   std::vector<std::vector<std::string>> DebugData;
-  std::string DebugDir = argv[1]; // FIXME: Add error handling
+
+  if( argc < 2 ){
+    std::cout << "ERROR : sst-dbg-console requires an argument" << std::endl;
+    std::cout << "Usage: " << std::endl;
+    std::cout << "      sst-dbg-console /path/to/run/directory -- sst /path/to/simulation.py" << std::endl;
+    return -1;
+  }
+
+  std::string DebugDir = argv[1];
   // std::filesystem::path DebugDirPath = DebugDir.value_or("./");
 
   std::unique_ptr<DumpDir> DumpDirectory(new DumpDir(argv[1], ".json"));
