@@ -15,6 +15,9 @@ include_directories(${SST_INCLUDE_DIR})
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
 if(BUILD_SSTDBG_IFACE_JSON_TESTING)
+  if(SSTDBG_MPI)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSSTDBG_MPI")
+  endif()
   foreach(testSrc ${TEST_SRCS})
     # Extract the file name
     get_filename_component(testName ${testSrc} NAME_WE)
