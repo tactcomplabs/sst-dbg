@@ -57,7 +57,6 @@ endif()
 set(SST_DBG_HEADER_INSTALL_PATH "${SST_INCLUDE_DIR}/sst/dbg")
 
 set(SST_CXX_FLAGS "-std=c++17 -D__STDC_FORMAT_MACROS")
-# set(CMAKE_CXX_STANDARD 14)
 set(SST_INCLUDE_DIR "")
 
 message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")

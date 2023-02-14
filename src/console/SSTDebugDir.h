@@ -1,3 +1,13 @@
+//
+// _SSTDebugDir_h_
+//
+// Copyright (C) 2017-2023 Tactical Computing Laboratories, LLC
+// All Rights Reserved
+// contact@tactcomplabs.com
+//
+// See LICENSE in the top level directory for licensing details
+//
+
 #include <iostream>
 #include <filesystem>
 #include <algorithm>
@@ -29,9 +39,11 @@ public:
     }
     std::string ProcessFile(std::string Filename){
       std::lock_guard<std::mutex> lock(m_unprocessed_files_mutex);
-      m_unprocessed_files.erase(std::remove(m_unprocessed_files.begin(), m_unprocessed_files.end(), Filename), m_unprocessed_files.end());
-      return Filename; 
-    } 
+      m_unprocessed_files.erase(std::remove(m_unprocessed_files.begin(),
+                                            m_unprocessed_files.end(),
+                                            Filename), m_unprocessed_files.end());
+      return Filename;
+    }
 
     const std::vector<std::string>& get_files() {
         std::lock_guard<std::mutex> lock(m_files_mutex);
@@ -66,8 +78,9 @@ private:
             if (!new_files.empty()) {
                 std::lock_guard<std::mutex> lock(m_files_mutex);
                 m_files.insert(m_files.end(), new_files.begin(), new_files.end());
-                // @JOHN: Stupid clarification... is a second mutex necessary because of access to two objects?
-                m_unprocessed_files.insert(m_unprocessed_files.end(), new_files.begin(), new_files.end());
+                m_unprocessed_files.insert(m_unprocessed_files.end(),
+                                           new_files.begin(),
+                                           new_files.end());
             }
 
             previous_files = current_files;

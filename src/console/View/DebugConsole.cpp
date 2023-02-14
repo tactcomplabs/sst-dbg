@@ -1,3 +1,13 @@
+//
+// _DebugConsole_cpp_
+//
+// Copyright (C) 2017-2023 Tactical Computing Laboratories, LLC
+// All Rights Reserved
+// contact@tactcomplabs.com
+//
+// See LICENSE in the top level directory for licensing details
+//
+
 #include "./DebugConsole.h"
 #include "Utils.h"
 #include "nlohmann/json.hpp"
