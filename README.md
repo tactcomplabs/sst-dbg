@@ -43,6 +43,7 @@ to the `SST_ROOT/bin` directory.
 ### Build options
 * -DBUILD\_ALL\_TESTING=ON : builds the test suite (use `make test` to run the test suite)
 * -DSSTDBG\_ASCII=ON : Enables ASCII output (default is JSON)
+* -DSSTDBG\_MPI=ON : Enables MPI support in the test harness
 
 ## Using sst-dbg
 

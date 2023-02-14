@@ -57,7 +57,7 @@ private:
 #ifdef SSTDBG_MPI
 #ifdef SSTDBG_ASCII
     // use CSV
-    Bin << NAME << "." << v1 << "," << v2 << std::endl;
+    Bin << Name << "." << v1 << "," << v2 << std::endl;
 #else
     // use JSON
     Bin << "," << std::endl << "\"" << v1 << "\": \""

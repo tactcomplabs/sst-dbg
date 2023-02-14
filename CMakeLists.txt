@@ -21,10 +21,12 @@ if(NOT SST_CONFIG)
 endif()
 
 #-- SETUP MPI ENV
-find_package(MPI)
-if(MPI_FOUND)
-  add_definitions(-DSSTDBG_MPI=1)
-  message(STATUS "Found MPI CXX at ${MPI_CXX_COMPILER}")
+if(SSTDBG_MPI)
+  find_package(MPI)
+  if(MPI_FOUND)
+    add_definitions(-DSSTDBG_MPI=1)
+    message(STATUS "Found MPI CXX at ${MPI_CXX_COMPILER}")
+  endif()
 endif()
 
 include(FetchContent)
