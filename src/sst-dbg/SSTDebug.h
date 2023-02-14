@@ -23,6 +23,10 @@
 #include <dirent.h>
 #include <algorithm>
 
+#ifdef SSTDBG_MPI
+#include <mpi.h>
+#endif
+
 // -- Required Macros
 #define SSTCYCLE  uint64_t
 #define SSTVALUE  std::vector<std::pair<std::string,std::string>>
@@ -50,6 +54,15 @@ private:
 
   template<typename T1, typename T2>
   void __internal_dump(T1 v1, T2 v2){
+#ifdef SSTDBG_MPI
+#ifdef SSTDBG_ASCII
+    // use CSV
+    Bin << NAME << "." << v1 << "," << v2 << std::endl;
+#else
+    // use JSON
+    Bin << "," << std::endl << "\"" << v1 << "\": \""
+        << v2 << "\"";
+#endif // #ifdef SSTDBG_ASCII
 #ifdef SSTDBG_ASCII
     // use CSV
     Bin << v1 << "," << v2 << std::endl;
@@ -58,6 +71,7 @@ private:
     Bin << "," << std::endl << "\"" << v1 << "\": \""
         << v2 << "\"";
 #endif
+#endif // #ifdef SSTDBG_MPI
   }
 
   void SplitStr(const std::string &s, char delim,
@@ -75,69 +89,6 @@ private:
         v.push_back(s.substr(i,s.length()));
       }
     }
-  }
-
-  /// SSTDebug: SST Debug retrieve the values from the ASCII target component at the target clock cycle
-  SSTVALUE GetASCIIDebugValues(std::string Component,
-                               SSTCYCLE Cycle){
-    SSTVALUE v;
-    std::ifstream Input;
-    std::string BinName = Component + "." + std::to_string(Cycle) + ".out";
-    Input.open(BinName.c_str());
-    if( !Input.is_open() )
-      return v;
-
-    std::string line;
-    std::vector<std::string> tmp;
-    while( std::getline(Input,line) ){
-      // split the line into two tokens: CSV format
-      SplitStr(line,',',tmp);
-      if( tmp.size() == 2 ){
-        v.push_back(std::pair<std::string,std::string>(tmp[0],tmp[1]));
-      }
-      tmp.clear();
-    }
-
-    Input.close();
-    return v;
-  }
-
-  /// SSTDebug: SST Debug retrieve the values from the JSON target component at the target clock cycle
-  SSTVALUE GetJSONDebugValues(std::string Component,
-                              SSTCYCLE Cycle){
-    SSTVALUE v;
-    std::ifstream Input;
-    std::string BinName = Component + "." + std::to_string(Cycle) + ".json";
-    Input.open(BinName.c_str());
-    if( !Input.is_open() )
-      return v;
-
-    std::string line;
-    std::vector<std::string> tmp;
-    // retrieve the first line
-    std::getline(Input,line);
-    if( line != "}" ){
-      Input.close();
-      return v;
-    }
-
-    while( std::getline(Input,line) ){
-      if( line == "}" ){
-        Input.close();
-        return v;
-      }
-      SplitStr(line,':',tmp);
-      if( tmp.size() == 2 ){
-        tmp[0].erase(std::remove(tmp[0].begin(),tmp[0].end(),'\"'),tmp[0].end());
-        tmp[1].erase(std::remove(tmp[1].begin(),tmp[1].end(),'\"'),tmp[1].end());
-        tmp[1].erase(std::remove(tmp[1].begin(),tmp[1].end(),','),tmp[1].end());
-        v.push_back(std::pair<std::string,std::string>(tmp[0],tmp[1]));
-      }
-      tmp.clear();
-    }
-
-    Input.close();
-    return v;
   }
 
 public:
@@ -164,6 +115,78 @@ public:
   template<typename T, typename U, typename... Args>
   bool dump(SSTCYCLE cycle, T t, U u, Args... args){
 
+//---------------------------------------------------------------
+// MPI DUMP
+//---------------------------------------------------------------
+#ifdef SSTDBG_MPI
+    int rank    = -1;
+    int isInit  = -1;
+    MPI_Initialized(&isInit);
+    if( isInit ){
+      // MPI is initialized
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+#ifdef SSTDBG_ASCII
+      std::string BinName = "SSTDbg." + std::to_string(rank) + "." + std::to_string(cycle) + ".out";
+#else
+      std::string BinName = "SSTDbg." + std::to_string(rank) + "." + std::to_string(cycle) + ".json";
+#endif
+      Bin.open(BinName.c_str(), std::ios::out|std::ios_base::app);
+      if( !Bin.is_open() )
+        return false;
+
+#ifdef SSTDBG_ASCII
+      // CSV
+      Bin << Name << "." << t << "," << u << std::endl;
+#else
+      // JSON
+      Bin << "{" << std::endl;
+      Bin << "\"Element\": \"" << Name << "\"," << std::endl;
+      Bin << "\"Cycle\": " << cycle;
+      Bin << "," << std::endl << "\"" << t << "\": \""
+          << u << "\"";
+#endif
+
+      __internal_dump(args...);
+
+#ifndef SSTDBG_ASCII
+      Bin << std::endl << "}" << std::endl;
+#endif
+    }else{
+      // MPI is not initialized, run the sequential (per file) output
+#ifdef SSTDBG_ASCII
+      std::string BinName = Name + "." + std::to_string(cycle) + ".out";
+#else
+      std::string BinName = Name + "." + std::to_string(cycle) + ".json";
+#endif
+      Bin.open(BinName.c_str(), std::ios::out);
+      if( !Bin.is_open() )
+        return false;
+
+#ifdef SSTDBG_ASCII
+      // CSV
+      Bin << t << "," << u << std::endl;
+#else
+      // JSON
+      Bin << "{" << std::endl;
+      Bin << "\"Element\": \"" << Name << "\"," << std::endl;
+      Bin << "\"Cycle\": " << cycle;
+      Bin << "," << std::endl << "\"" << t << "\": \""
+          << u << "\"";
+#endif
+
+      __internal_dump(args...);
+
+#ifndef SSTDBG_ASCII
+      Bin << std::endl << "}" << std::endl;
+#endif
+    }
+
+//---------------------------------------------------------------
+// NON-MPI DUMP
+//---------------------------------------------------------------
+#else
+    // MPI builds were disabled, write out one file per component
 #ifdef SSTDBG_ASCII
     std::string BinName = Name + "." + std::to_string(cycle) + ".out";
 #else
@@ -190,7 +213,9 @@ public:
 #ifndef SSTDBG_ASCII
     Bin << std::endl << "}" << std::endl;
 #endif
+#endif  // #ifdef SSTDBG_MPI
 
+    // all versions close the file
     Bin.close();
 
     return true;
@@ -352,6 +377,71 @@ public:
 
     return v;
   }
+
+  /// SSTDebug: SST Debug retrieve the values from the ASCII target component at the target clock cycle
+  SSTVALUE GetASCIIDebugValues(std::string Component,
+                               SSTCYCLE Cycle){
+    SSTVALUE v;
+    std::ifstream Input;
+    std::string BinName = Component + "." + std::to_string(Cycle) + ".out";
+    Input.open(BinName.c_str());
+    if( !Input.is_open() )
+      return v;
+
+    std::string line;
+    std::vector<std::string> tmp;
+    while( std::getline(Input,line) ){
+      // split the line into two tokens: CSV format
+      SplitStr(line,',',tmp);
+      if( tmp.size() == 2 ){
+        v.push_back(std::pair<std::string,std::string>(tmp[0],tmp[1]));
+      }
+      tmp.clear();
+    }
+
+    Input.close();
+    return v;
+  }
+
+  /// SSTDebug: SST Debug retrieve the values from the JSON target component at the target clock cycle
+  SSTVALUE GetJSONDebugValues(std::string Component,
+                              SSTCYCLE Cycle){
+    SSTVALUE v;
+    std::ifstream Input;
+    std::string BinName = Component + "." + std::to_string(Cycle) + ".json";
+    Input.open(BinName.c_str());
+    if( !Input.is_open() )
+      return v;
+
+    std::string line;
+    std::vector<std::string> tmp;
+    // retrieve the first line
+    std::getline(Input,line);
+    if( line != "}" ){
+      Input.close();
+      return v;
+    }
+
+    while( std::getline(Input,line) ){
+      if( line == "}" ){
+        Input.close();
+        return v;
+      }
+      SplitStr(line,':',tmp);
+      if( tmp.size() == 2 ){
+        tmp[0].erase(std::remove(tmp[0].begin(),tmp[0].end(),'\"'),tmp[0].end());
+        tmp[1].erase(std::remove(tmp[1].begin(),tmp[1].end(),'\"'),tmp[1].end());
+        tmp[1].erase(std::remove(tmp[1].begin(),tmp[1].end(),','),tmp[1].end());
+        v.push_back(std::pair<std::string,std::string>(tmp[0],tmp[1]));
+      }
+      tmp.clear();
+    }
+
+    Input.close();
+    return v;
+  }
+
+
 
   /// SSTDebug: SST Debug retrieve the values from the target component at the target clock cycle
   SSTVALUE GetDebugValues(std::string Component,

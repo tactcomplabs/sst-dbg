@@ -246,6 +246,21 @@ void basicClock::printStatus(Output& out){
 }
 ```
 
+### Building sst-dbg components with MPI support
+
+If you seek to reduce the number of files generated during a given parallel simulation, 
+we highly suggest that you enable MPI functionality in SST-Dbg.  This switches the base 
+library to generate a single file per MPI rank per dump iteration.  These files will 
+be generated in the form: `SSTDbg.RANK.CLOCK.json/csv`.
+
+Enabling this functionality requires that the user build the SST component with 
+the MPI compiler wrapper (`mpicxx`) and enable the SSTDBG_MPI preprocessor macro.  This 
+mimics the following:
+
+```
+mpic++ -O2  -std=c++1y -D__STDC_FORMAT_MACROS -fPIC -DHAVE_CONFIG_H -I/scratch/sst/sst-12.1.0/include -I/scratch/sst/sst-12.1.0/elements/include -DENABLE_SSTDBG -DSSTDBG_MPI -DDEBUG -g -I./ -c myComponent.cc
+```
+
 ### Executing sst-dbg
 ```
 $> sst-dbg -i 10 -- sst basicTest.py
