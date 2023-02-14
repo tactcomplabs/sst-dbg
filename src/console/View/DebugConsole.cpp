@@ -8,8 +8,7 @@
 // See LICENSE in the top level directory for licensing details
 //
 
-#include "./DebugConsole.h"
-#include "Utils.h"
+#include "DebugConsole.h"
 #include "nlohmann/json.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <chrono>
