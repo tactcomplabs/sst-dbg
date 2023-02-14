@@ -9,15 +9,32 @@
 # this distribution.
 #
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.14)
 project(sst-dbg CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 
 #--- SETUP BUILD ENV
 find_program(SST_CONFIG sst-config)
 if(NOT SST_CONFIG)
   message(FATAL_ERROR "No sst-config found in the current path")
 endif()
+
+include(FetchContent)
+
+# --- Fetch FTXUI
+FetchContent_Declare(ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+  # GIT_TAG v3.0.0
+)
+
+FetchContent_GetProperties(ftxui)
+if(NOT ftxui_POPULATED)
+  FetchContent_Populate(ftxui)
+  add_subdirectory(${ftxui_SOURCE_DIR} ${ftxui_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# END FTXUI
 
 message(STATUS "Using sst-config at ${SST_CONFIG}")
 
@@ -39,8 +56,7 @@ endif()
 
 set(SST_DBG_HEADER_INSTALL_PATH "${SST_INCLUDE_DIR}/sst/dbg")
 
-set(SST_CXX_FLAGS "-std=c++1y -D__STDC_FORMAT_MACROS")
-set(CMAKE_CXX_STANDARD 14)
+set(SST_CXX_FLAGS "-std=c++17 -D__STDC_FORMAT_MACROS")
 set(SST_INCLUDE_DIR "")
 
 message(STATUS "SST CXX flags set to: ${SST_CXX_FLAGS}")
