@@ -6,8 +6,8 @@ See the include LICENSE file.
 ## Getting Started
 
 ### Prerequisites
-* C++14 Compiler (LLVM/Clang and GCC are tested)
-* CMake 2.6+
+* C++17 Compiler (LLVM/Clang and GCC are tested; gcc 8+ is preferred)
+* CMake 3.14+
 * SST 12.0.1+ (other versions may work, but are not tested)
 
 ### Building
