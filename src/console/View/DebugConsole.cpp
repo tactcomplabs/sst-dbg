@@ -395,6 +395,14 @@ std::string DebugConsole::GetCommandName() const {
 
 void DebugConsole::PrintHelp() {
   OnLog({"Usage: $g[sst-dbg] [OPTIONS] -- /path/to/sst arg1 arg2 arg3 ..."});
+  OnLog({"$b[Help Menu] Commands:"});
+  OnLog({"$g - [ls]              -- List all files in current directory"});
+  OnLog({"$g - [!]               -- All commands issued with a bang(!) prefix will be executed as a shell command"});
+  OnLog({"$g - [exit|q|quit]     -- Quit console (NOTE: Ends sst processes started within console"});
+  OnLog({"$g - [run]             -- Execute SST via sst-dbg"});
+  OnLog({"$b                        - ex. run --iter 5 -- sst MyTest.py"});
+  OnLog({"$b                        - ex. run --i 10 -- mpirun MyTest.py"});
+  OnLog({"$b                        - ex. run --rand -- sst MyTest.py"});
 }
 
 void DebugConsole::ExecuteCmd(std::string debug_shell_cmd) {
