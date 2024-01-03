@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# scripts/slurm/build-llvm12-sst13.1.0.sh
+# scripts/slurm/build-openmpi4.1.0-sst13.1.0.sh
 #
 # Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 # All Rights Reserved
@@ -20,9 +20,11 @@
 
 #-- Stage 1: load the necessary modules
 source /etc/profile.d/modules.sh
-module load cmake/3.23.0 llvm/12.0.0 sst/13.1.0
-export CC=clang
-export CXX=clang++
+module load cmake/3.23.0 sst/13.1.0 openmpi/gcc/64/4.1.0 llvm/12.0.0
+export CC=mpicc
+export CXX=mpicxx
+export OMPI_CC=clang
+export OMPI_CXX=clang++
 
 touch sstdbg.jenkins.${SLURM_JOB_ID}.out
 sst --version >> sstdbg.jenkins.${SLURM_JOB_ID}.out 2>&1
