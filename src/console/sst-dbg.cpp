@@ -69,6 +69,12 @@ bool SetupSSTArgs(CLICONF &Conf){
   std::vector<std::string> v;
   SplitStr(Conf.SSTArgs,' ',v);
 
+  if( v.size() <= 1 ){
+    std::cout << "Error : not enough arguments" << std::endl;
+    PrintHelp();
+    return false;
+  }
+
   if( v[0] == "sst" ){
     // the first arg is a relative path, derive the actual path
     char name[] = "/tmp/sstpathXXXXXX";
