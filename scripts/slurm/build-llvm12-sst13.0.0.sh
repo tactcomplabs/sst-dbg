@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# scripts/slurm/build-gcc11-sst13.0.0.sh
+# scripts/slurm/build-llvm12-sst13.0.0.sh
 #
 # Copyright (C) 2017-2024 Tactical Computing Laboratories, LLC
 # All Rights Reserved
