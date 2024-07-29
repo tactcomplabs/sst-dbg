@@ -11,7 +11,15 @@
 
 include (FetchContent)
 
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+if(CMAKE_VERSION VERSION_LESS "3.24.2")
+  FetchContent_Declare(json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+else()
+  FetchContent_Declare(json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+    DOWNLOAD_EXTRACT_TIMESTAMP ON)
+endif()
+
 FetchContent_MakeAvailable(json)
 
 set(CONSOLE_SRCS

@@ -357,7 +357,7 @@ const char *DebugConsole::GenerateTimeString(const DebugMsg &message) {
 
   const float flSeconds = seconds + (message.timeSubmitted - iTime);
 
-  sprintf(buffer, "%03i:%06.3f ", minutes, flSeconds);
+  snprintf(buffer, 16, "%03i:%06.3f ", minutes, flSeconds);
   return buffer;
 }
 
