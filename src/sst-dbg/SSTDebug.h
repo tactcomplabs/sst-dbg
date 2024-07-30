@@ -54,7 +54,6 @@ private:
 
   template<typename T1, typename T2>
   void __internal_dump(T1 v1, T2 v2){
-#ifdef SSTDBG_MPI
 #ifdef SSTDBG_ASCII
     // use CSV
     Bin << Name << "." << v1 << "," << v2 << std::endl;
@@ -71,7 +70,6 @@ private:
     Bin << "," << std::endl << "\"" << v1 << "\": \""
         << v2 << "\"";
 #endif
-#endif // #ifdef SSTDBG_MPI
   }
 
   void SplitStr(const std::string &s, char delim,
