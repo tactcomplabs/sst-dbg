@@ -1,5 +1,5 @@
 //
-// iface_json_test7.cpp
+// iface_ascii_test8.cpp
 //
 // Copyright (C) 2017-2023 Tactical Computing Laboratories, LLC
 // All Rights Reserved
@@ -10,9 +10,11 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <list>
 #include "SSTDebug.h"
 
-std::string TEST_NAME = "iface_json_test7";
+std::string TEST_NAME = "iface_ascii_test8";
 
 int main( int argc, char **argv ){
   std::cout << "TEST = " << __FILE__ << std::endl;
@@ -25,11 +27,18 @@ int main( int argc, char **argv ){
   unsigned long long TEST = 42;
   double DPF = 3.14;
 
+  std::vector<unsigned> V1 = {1, 2, 3, 4, 5};
+  std::list L1{1, 2, 3};
+
   Dbg.dump(CYCLE, "FOO", FOO);
   Dbg.dump(CYCLE+1, "FOO", FOO, "BAR", BAR);
   Dbg.dump(CYCLE+2, DARG(FOO));
   Dbg.dump(CYCLE+3, DARG(FOO), DARG(BAR));
   Dbg.dump(CYCLE+4, DARG(FOO), DARG(BAR), DARG(TEST), DARG(DPF));
+  //Dbg.dump(CYCLE+5, DARG(V1));
+  Dbg.dump(CYCLE+6, DARG(FOO), DARG(V1));
+  Dbg.dump(CYCLE+7, DARG(FOO), DARG(L1));
+  Dbg.dump(CYCLE+8, DARG(FOO), DARG(V1), DARG(L1));
 
   std::vector<std::string> Comps = Dbg.GetComponents();
 
