@@ -22,6 +22,7 @@
 #include <typeinfo>
 #include <dirent.h>
 #include <algorithm>
+#include <cstdint>
 
 #ifdef SSTDBG_MPI
 #include <mpi.h>
