@@ -39,6 +39,8 @@ typedef struct{
   std::string SSTPath;
 }CLICONF;
 
+CLICONF Conf;
+
 void PrintHelp(){
   std::cout << " Usage: sst-dbg [OPTIONS] -- /path/to/sst arg1 arg2 arg3 ..." << std::endl;
   std::cout << " Options:" << std::endl;
@@ -323,9 +325,11 @@ bool ExecuteSST(CLICONF &Conf, char **argv){
   return true;
 }
 
-int main(int argc, char **argv){
+void ctrlc_handler(int sig){
+  kill(Conf.pid, SIGINT);
+}
 
-  CLICONF Conf;
+int main(int argc, char **argv){
 
   if( !ParseArgs(argc, argv, Conf) ){
     return -1;
@@ -341,6 +345,11 @@ int main(int argc, char **argv){
   // that we attempt to trigger a dump command before SST has initialized
   // it's internal signal handlers
   signal(SIGUSR2,SIG_IGN);
+
+  // Setup a signal handler to catch ctrl-c
+  // This allows us to catch the control-c (SIGINT) signal and send it to
+  // the SST process
+  signal(SIGINT, ctrlc_handler);
 
   // Sanity check the args
   if( !SanityCheck(Conf) ){

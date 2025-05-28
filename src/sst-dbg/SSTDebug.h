@@ -22,6 +22,7 @@
 #include <typeinfo>
 #include <dirent.h>
 #include <algorithm>
+#include <cstdint>
 
 #ifdef SSTDBG_MPI
 #include <mpi.h>
@@ -52,6 +53,15 @@ private:
   void __internal_dump(Args... args){
   }
 
+  template <typename T, template <typename, typename> class ContainerType,
+          typename ValueType,
+          typename AllocType>
+  void __internal_dump(T t, const ContainerType<ValueType, AllocType>& c) {
+    for (const auto& v : c) {
+      __internal_dump(t, v);
+    }
+  }
+
   template<typename T1, typename T2>
   void __internal_dump(T1 v1, T2 v2){
 #ifdef SSTDBG_MPI
@@ -63,6 +73,7 @@ private:
     Bin << "," << std::endl << "\"" << v1 << "\": \""
         << v2 << "\"";
 #endif // #ifdef SSTDBG_ASCII
+#endif // #ifdef SSTDBG_MPI
 #ifdef SSTDBG_ASCII
     // use CSV
     Bin << v1 << "," << v2 << std::endl;
@@ -71,7 +82,6 @@ private:
     Bin << "," << std::endl << "\"" << v1 << "\": \""
         << v2 << "\"";
 #endif
-#endif // #ifdef SSTDBG_MPI
   }
 
   void SplitStr(const std::string &s, char delim,
